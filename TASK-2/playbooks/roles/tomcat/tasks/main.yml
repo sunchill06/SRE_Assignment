@@ -1,0 +1,7 @@
+---
+# tasks file for tomcat
+
+#- name: Tasks for installing Tomcat
+
+- include: tomcat-setup.yml
+

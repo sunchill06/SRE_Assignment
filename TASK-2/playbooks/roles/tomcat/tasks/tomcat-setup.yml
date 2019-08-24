@@ -1,0 +1,62 @@
+# Playbook to setup tomcat
+
+  - name: Install JDK
+    yum:
+      name: java-1.8.0-openjdk
+      state: present
+
+  - name: Add Tomcat group
+    group:
+      name: tomcat{{ http_port }}
+      state: present
+
+  - name: Add Tomcat user
+    user:
+      name: tomcat{{ http_port }}
+      group: tomcat{{ http_port }}
+      home: /usr/share/tomcat{{ http_port }}
+      createhome: no
+      state: present
+      
+  - name: create tomcat installation directory
+    file:
+      path: /usr/share/tomcat{{ http_port }}
+      state: directory
+      mode: 0755
+      owner: tomcat{{ http_port }}
+      group: tomcat{{ http_port }}
+
+  - name: Download Tomcat Package
+    get_url:
+      url: "{{ tomcat_archive_url }}"
+      dest: "{{ tomcat_archive_dest }}"
+
+  - name: Extract the Tomcat Package
+    unarchive:
+      src: "{{ tomcat_archive_dest }}"
+      dest: /usr/share/tomcat{{ http_port }}
+      owner: tomcat{{ http_port }}
+      group: tomcat{{ http_port }}
+      remote_src: yes
+      extra_opts: "--strip-components=1"
+      creates: /usr/share/tomcat{{ http_port }}/bin
+          
+  - name: Copy tomcat service file
+    template:
+      src: templates/tomcat.service.j2
+      dest: /etc/systemd/system/tomcat{{ http_port }}.service
+    when: ansible_service_mgr == "systemd"
+  
+  - name: Copy tomcat server.xml file
+    template:
+      src: templates/server.xml.j2
+      dest: /usr/share/tomcat{{ http_port }}/conf/server.xml
+    when: ansible_service_mgr == "systemd"
+
+  - name: Start and enable tomcat
+    service:
+      daemon_reload: yes
+      name: tomcat{{ http_port }}
+      state: started
+      enabled: yes
+    when: ansible_service_mgr == "systemd"
