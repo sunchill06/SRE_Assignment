@@ -5,7 +5,7 @@ pipeline {
 	stages {
 		stage("Syntax check") {
 			steps {
-				git url: 'https://github.com/sunchill06/SRE_Assignment.git, branch: 'master'
+				git url: 'https://github.com/sunchill06/SRE_Assignment.git', branch: 'master'
 				sh '''
 				echo "Syntax checking playbook"
 				# Run a syntax check for the playbook
